@@ -1,5 +1,5 @@
-const {User}= require('../models');
-// BONUS remove user's assoicated thoughts when deleted
+const {User, Thoughts}= require('../models');
+
 const UserController ={
     // get all User
     getAllUser(req,res){
@@ -51,10 +51,15 @@ const UserController ={
             res.sendStatus(404);
         })
     },
-    // delete user by its id
+    // delete user & thoughts by its id
     deleteUserById({params,body},res){
         User.findOneAndDelete({_id:params.id})
-        .then(dbUserData =>res.json(dbUserData))
+        .then(dbUserData => {
+            if(!dbUserData){
+                return res.json(404).json({message:"No User found with this ID!"});
+            }
+            return Thoughts.deleteMany({_id:{$in:dbUserData.thoughts}})
+        })
         .catch(err =>{
             console.log(err);
             res.sendStatus(404);
@@ -62,9 +67,9 @@ const UserController ={
     },
     // add new friend to a user's friend list
     addUserFriend({params},res){
-        User.findOneAndUpdate({_id:params.id},{$push:{friends: params.friendId}},{new:true})
+        User.findOneAndUpdate({_id:params.id},{$push:{friends: params.friendsId}},{new:true})
         .populate({
-            path:"friend",
+            path:"friends",
             select:"-__v"
         })
         .select("-__v")
@@ -82,9 +87,9 @@ const UserController ={
     },
         // delete friend to a user's friend list
         deleteUserFriend({params},res){
-            User.findOneAndDelete({_id:params.id},{$pull:{friends: params.friendId}},{new:true})
+            User.findOneAndDelete({_id:params.id},{$pull:{friends: params.friendsId}},{new:true})
             .populate({
-                path:"friend",
+                path:"friends",
                 select:"-__v"
             })
             .select("-__v")
