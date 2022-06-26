@@ -33,20 +33,17 @@ getThoughtsById({params},res){
 //   create a new thought 
 createThoughts({params,body},res){
     Thoughts.create(body)
-    .then(({_id})=>{
-        return User.findOneAndUpdate({_id:params.UserId},{$push:{Thoughts:_id}},{new:true});
+    .then(({_id}) => {
+        return User.findOneAndUpdate({ _id: params.userId}, {$push: {thoughts: _id}}, {new: true});
     })
-    .then(dbThoughtsData=>{
-        if(!dbThoughtsData){
-            res.status(404).json({message:'No thoughts found with this ID!'});
+    .then(dbThoughtsData => {
+        if(!dbThoughtsData) {
+            res.status(404).json({message: 'No thoughts with this particular ID!'});
             return;
         }
         res.json(dbThoughtsData)
     })
-    .catch(err =>{
-        console.log(err);
-        res.sendStatus(404);
-    })
+    .catch(err => res.json(err)); 
   },
 //   update thoughts 
   updateThoughts({params,body},res){
