@@ -87,24 +87,19 @@ const UserController ={
     },
         // delete friend to a user's friend list
         deleteUserFriend({params},res){
-            User.findOneAndDelete({_id:params.id},{$pull:{friends: params.friendsId}},{new:true})
-            .populate({
-                path:"friends",
-                select:"-__v"
-            })
-            .select("-__v")
-            .then(dbUserData =>{
-                if(!dbUserData){
-                    res.send(404).json({message:'User id no matches'});
+            User.findOneAndUpdate({_id: params.id}, {$pull: { friends: params.friendId}}, {new: true})
+            .populate({path: 'friends', select: '-__v'})
+            .select('-__v')
+            .then(dbUsersData => {
+                if(!dbUsersData) {
+                    res.status(404).json({message: 'No User with this particular ID!'});
                     return;
                 }
-                res.json(dbUserData)
+                res.json(dbUsersData);
             })
-            .catch(err =>{
-                console.log(err);
-                res.sendStatus(404);
-            })
+            .catch(err => res.status(400).json(err));
         }
+    
 }
 
 
